@@ -1,0 +1,5 @@
+<properties>
+    <property id="qris1" type="string"></property>
+    <property id="qris2" type="string"></property>
+    <property id="qris3" type="string"></property>
+</properties>

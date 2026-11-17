@@ -1,0 +1,11 @@
+<settings>
+    <setting propertyKey="@Properties.qris1" title="@Strings.SetQris1">
+        <settingConfig type="alphaNumeric" maxLength="512" />
+    </setting>
+    <setting propertyKey="@Properties.qris2" title="@Strings.SetQris2">
+        <settingConfig type="alphaNumeric" maxLength="512" />
+    </setting>
+    <setting propertyKey="@Properties.qris3" title="@Strings.SetQris3">
+        <settingConfig type="alphaNumeric" maxLength="512" />
+    </setting>
+</settings>
