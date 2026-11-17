@@ -17,9 +17,17 @@ Paste your static QRIS text once (in this app's settings in Garmin Connect), the
 
 ## Setup
 
-1. Get your static QRIS as text: scan your printed QRIS sticker with any QR scanner app that can show the raw text, and copy it (it starts with `000201...`).
+1. Get your static QRIS as text with the companion **QRIS to Text** tool below (or any QR scanner app that can show the raw text) and copy it (it starts with `000201...`).
 2. In Garmin Connect: My Apps → QRIS Dinamis → Settings — paste the text into Profile 1 (Profiles 2 and 3 are optional).
 3. Open the app on your watch, set the amount with UP/DOWN, press START, and let the payer scan.
+
+## QRIS to Text (companion tool)
+
+Need your QRIS as text for step 1? Use **[QRIS to Text](https://krezeks.github.io/qris-dinamis/qris-to-text.html)**: open the page, pick a screenshot or photo of your QRIS, and copy the payload text it reads.
+
+- Runs **100% in your browser** (jsQR) — your QRIS image is never uploaded anywhere
+- Parses the EMVCo fields and verifies the payload CRC, so a mis-read code is flagged before you paste it
+- Single self-contained file: [`qris-to-text.html`](qris-to-text.html) — you can also download it and use it offline
 
 ## Building
 
