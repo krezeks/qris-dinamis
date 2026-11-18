@@ -33,7 +33,7 @@ Paste your static QRIS text once (in this app's settings in Garmin Connect), the
 
 ## QRIS to Text (companion tool)
 
-Need your QRIS as text for step 1? Use **[QRIS to Text](https://krezeks.github.io/qris-dinamis/qris-to-text.html)**: open the page, pick a screenshot or photo of your QRIS, and copy the payload text it reads.
+Need your QRIS as text for step 1? Use **[QRIS to Text](https://krezeks.github.io/qris-dinamis-for-garmin/qris-to-text.html)**: open the page, pick a screenshot or photo of your QRIS, and copy the payload text it reads.
 
 - Runs **100% in your browser** (jsQR) — your QRIS image is never uploaded anywhere
 - Parses the EMVCo fields and verifies the payload CRC, so a mis-read code is flagged before you paste it
