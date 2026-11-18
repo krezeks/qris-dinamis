@@ -10227,6 +10227,37 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     }
     return tags;
   }
+  function parseNestedOk(v){
+    var t; try{ t=parseTLV(v); }catch(e){ return null; }
+    if(!t.length) return null;
+    var seen={};
+    for(var i=0;i<t.length;i++){ if(seen[t[i][0]]) return null; seen[t[i][0]]=1; }
+    return t;
+  }
+  // Structural mirror of the watch app's validation: no duplicate tags,
+  // mandatory QRIS fields present, and nested template TLV (merchant
+  // account 26-51, additional data 62, language 64, unreserved 80-99)
+  // must parse cleanly, with the account template opening on subtag 00.
+  function structuralOk(tags){
+    var seen={}, dict={}, hasAcc=false;
+    for(var i=0;i<tags.length;i++){
+      if(seen[tags[i][0]]) return false;
+      seen[tags[i][0]]=1; dict[tags[i][0]]=tags[i][1];
+    }
+    if(tags[0][0]!=="00"||tags[0][1]!=="01") return false;
+    var last=tags[tags.length-1];
+    if(last[0]!=="63"||last[1].length!==4) return false;
+    if(!dict["01"]||!dict["52"]||dict["53"]!=="360"||dict["58"]!=="ID"||!dict["59"]||!dict["60"]) return false;
+    for(var i=0;i<tags.length;i++){
+      var id=parseInt(tags[i][0],10);
+      if((id>=26&&id<=51)||id===62||id===64||(id>=80&&id<=99)){
+        var sub=parseNestedOk(tags[i][1]);
+        if(!sub) return false;
+        if(id>=26&&id<=51){ if(sub[0][0]!=="00"||!sub[0][1].length) return false; hasAcc=true; }
+      }
+    }
+    return hasAcc;
+  }
   function fmtRupiah(digits){
     return "Rp"+digits.replace(/\B(?=(\d{3})+(?!\d))/g,".");
   }
@@ -10234,11 +10265,12 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
   function showResult(text){
     resultCard.classList.remove('hidden');
     payloadBox.value=text;
-    var rows=[], ok=false, isQris=/^000201/.test(text);
+    var rows=[], ok=false, dyn=false, isQris=/^000201/.test(text);
     try{
       var tags=parseTLV(text), dict={};
       tags.forEach(function(t){ dict[t[0]]=t[1]; });
-      ok=crcValid(text);
+      ok=crcValid(text) && structuralOk(tags);
+      dyn=(dict["01"]==="12" || !!dict["54"]);
       if(dict["59"]) rows.push(["Nama merchant", dict["59"]]);
       if(dict["60"]) rows.push(["Kota", dict["60"]]);
       if(dict["01"]) rows.push(["Jenis QR", dict["01"]==="12" ? "Dinamis" : "Statis"]);
@@ -10249,10 +10281,12 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     }catch(e){ ok=false; }
     if(isQris && ok && text.length>259){
       statusBox.innerHTML='<div class="status bad">⚠️ QRIS valid, tapi panjangnya '+text.length+' karakter — melebihi batas 259 karakter untuk aplikasi jam QRIS Dinamis (batas encoder QR di jam), jadi teks ini tidak bisa dipakai di jam.</div>';
+    }else if(isQris && ok && dyn){
+      statusBox.innerHTML='<div class="status bad">⚠️ QRIS ini sudah dinamis / ada nominal tertanam — aplikasi jam butuh teks QRIS STATIS aslinya. Ambil dari stiker atau screenshot QRIS tanpa nominal.</div>';
     }else if(isQris && ok){
-      statusBox.innerHTML='<div class="status ok">✅ QRIS valid — CRC cocok. Teks ini siap ditempel ke aplikasi.</div>';
+      statusBox.innerHTML='<div class="status ok">✅ Struktur QRIS dan CRC cocok. Teks ini siap ditempel ke aplikasi.</div>';
     }else if(isQris){
-      statusBox.innerHTML='<div class="status bad">⚠️ Terbaca sebagai QRIS, tapi CRC tidak cocok — kemungkinan gambar kurang jelas dan ada karakter yang salah terbaca. Coba screenshot yang lebih tajam.</div>';
+      statusBox.innerHTML='<div class="status bad">⚠️ Terbaca sebagai QRIS, tapi struktur atau CRC-nya tidak valid — kemungkinan gambar kurang jelas dan ada karakter yang salah terbaca. Coba screenshot yang lebih tajam.</div>';
     }else{
       statusBox.innerHTML='<div class="status bad">⚠️ QR terbaca, tapi isinya bukan QRIS (tidak diawali 000201). Teksnya tetap ditampilkan di bawah.</div>';
     }

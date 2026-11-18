@@ -216,7 +216,42 @@ module QrisConvert {
         if (getTag(t, "60") == null) {
             return false;
         }
+        // Template tags carry nested TLV that must also parse strictly
+        // (adopted 2026-11-18 from the external reviewer's patch): a
+        // crafted payload would hide its broken structure inside the
+        // merchant account or additional-data templates, so those are
+        // walked with the same rules, and a merchant account template
+        // must open with its global unique identifier (subtag 00).
+        for (var i = 0; i < t.size(); i++) {
+            var pair = t[i] as Array<String>;
+            if (isTemplateTag(pair[0])) {
+                var nested = parseStrict(pair[1]);
+                if (nested == null) {
+                    return false;
+                }
+                var tn = pair[0].toNumber() as Number;
+                if (tn >= 26 && tn <= 51) {
+                    var nfirst = (nested as Array)[0] as Array<String>;
+                    if (!nfirst[0].equals("00") || nfirst[1].length() == 0) {
+                        return false;
+                    }
+                }
+            }
+        }
         return true;
+    }
+
+    // EMVCo template tags: merchant account information (26-51),
+    // additional data (62), language template (64), and the
+    // unreserved templates (80-99) all contain nested TLV.
+    function isTemplateTag(tag as String) as Boolean {
+        var tn = tag.toNumber();
+        if (tn == null) {
+            return false;
+        }
+        var n = tn as Number;
+        return (n >= 26 && n <= 51) || n == 62 || n == 64
+            || (n >= 80 && n <= 99);
     }
 
     // Merchant display name (tag 59), "" when absent or malformed.
