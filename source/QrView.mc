@@ -1,6 +1,7 @@
 import Toybox.Attention;
 import Toybox.Graphics;
 import Toybox.Lang;
+import Toybox.System;
 import Toybox.Timer;
 import Toybox.WatchUi;
 
@@ -89,14 +90,25 @@ class QrView extends WatchUi.View {
         var n = qr.size;
         var quiet = 2;
         var total = n + 2 * quiet;
-        var avail = 196;   // inscribed-square safe width of the 280 px dial
+        // Fit the symbol + quiet zone inside the screen's safe area,
+        // computed from the actual device: on round dials that is the
+        // inscribed square (~70% of the dial) so the corner finders
+        // stay clear of the bezel curve — on the 280 px FR165 this
+        // yields exactly the 196 px this layout was tuned on.
+        // Rectangular screens can use nearly their full width.
+        var minDim = w < h ? w : h;
+        var avail = (System.getDeviceSettings().screenShape
+                == System.SCREEN_SHAPE_RECTANGLE)
+            ? (minDim * 94) / 100
+            : (minDim * 70) / 100;
         var m = avail / total;
         if (m < 1) {
             m = 1;
         }
         var side = total * m;
+        var labelH = (h * 11) / 100;   // label reserve (30 px at 280 px)
         var ox = (w - side) / 2 + quiet * m;
-        var oy = (h - side - 30) / 2 + quiet * m;   // 30 px reserved for label
+        var oy = (h - side - labelH) / 2 + quiet * m;
 
         // The clear above already painted the white quiet zone; the screen
         // background is white everywhere, so the effective quiet zone

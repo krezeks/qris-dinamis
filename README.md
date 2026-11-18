@@ -1,10 +1,20 @@
-# QRIS Dinamis
+# QRIS Dinamis for Garmin
 
-A Connect IQ watch app for Garmin Forerunner 165 that turns a static QRIS code into a **dynamic** one — right on your wrist.
+A Connect IQ watch app that turns a static QRIS code into a **dynamic** one — right on your wrist.
 
 Paste your static QRIS text once (in this app's settings in Garmin Connect), then set any amount on the watch and show a QR code with that amount already filled in. The payer just scans and pays, no typing.
 
 **On the Connect IQ Store:** [QRIS Dinamis Watch](https://apps.garmin.com/apps/9b152157-4ccb-4d9d-be47-b92038c8329b) (free)
+
+## Supported devices
+
+19 Garmin models — the QR layout adapts automatically to each watch's screen size and shape:
+
+- **Forerunner** 165, 255, 255 Music, 255S, 255S Music, 265, 265S, 955, 965
+- **Fenix 7** series (7, 7S, 7X) including the **Pro** series
+- **Epix** (Gen 2)
+- **Venu** 3, 3S
+- **Vivoactive** 5
 
 ## Features
 
@@ -31,17 +41,17 @@ Need your QRIS as text for step 1? Use **[QRIS to Text](https://krezeks.github.i
 
 ## Building
 
-Requires the Connect IQ SDK (developed against 8.4.1) and the fr165 device package.
+Requires the Connect IQ SDK (developed against 8.4.1) and the device packages for the supported models (via the Connect IQ SDK Manager).
 
 ```sh
-# Sideload build (.prg)
+# Sideload build (.prg, per device)
 monkeyc -d fr165 -o bin/QrisDinamis.prg -f monkey.jungle -y <developer_key.der> -w
 
-# Store package (.iq)
+# Store package (.iq, all supported devices)
 monkeyc -e -o bin/QrisDinamis.iq -f monkey.jungle -y <developer_key.der> -w
 ```
 
-The app generates QR codes on-device with a chunked encoder (`QrEncoder.mc`) that works within the Connect IQ watchdog limits, and converts static → dynamic payloads by rewriting the EMVCo TLV fields (point-of-initiation `01` → `12`, inserting amount tag `54`, recomputing CRC16) in `QrisConvert.mc`.
+The app generates QR codes on-device with a chunked encoder (`QrEncoder.mc`) that works within the Connect IQ watchdog limits, and converts static → dynamic payloads by rewriting the EMVCo TLV fields (point-of-initiation `01` → `12`, inserting amount tag `54`, recomputing CRC16) in `QrisConvert.mc`. The QR safe area is computed per device from its screen shape and size in `QrView.mc`.
 
 ## Notes
 
