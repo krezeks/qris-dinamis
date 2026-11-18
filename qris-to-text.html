@@ -10247,23 +10247,38 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       if(dict["52"]) rows.push(["Kategori (MCC)", dict["52"]]);
       rows.push(["Panjang payload", text.length+" karakter"]);
     }catch(e){ ok=false; }
-    if(isQris && ok){
+    if(isQris && ok && text.length>259){
+      statusBox.innerHTML='<div class="status bad">⚠️ QRIS valid, tapi panjangnya '+text.length+' karakter — melebihi batas 259 karakter untuk aplikasi jam QRIS Dinamis (batas encoder QR di jam), jadi teks ini tidak bisa dipakai di jam.</div>';
+    }else if(isQris && ok){
       statusBox.innerHTML='<div class="status ok">✅ QRIS valid — CRC cocok. Teks ini siap ditempel ke aplikasi.</div>';
     }else if(isQris){
       statusBox.innerHTML='<div class="status bad">⚠️ Terbaca sebagai QRIS, tapi CRC tidak cocok — kemungkinan gambar kurang jelas dan ada karakter yang salah terbaca. Coba screenshot yang lebih tajam.</div>';
     }else{
       statusBox.innerHTML='<div class="status bad">⚠️ QR terbaca, tapi isinya bukan QRIS (tidak diawali 000201). Teksnya tetap ditampilkan di bawah.</div>';
     }
-    infoBox.innerHTML = rows.length
-      ? '<table class="info">'+rows.map(function(r){return "<tr><td class='k'>"+r[0]+"</td><td>"+r[1]+"</td></tr>";}).join("")+"</table>"
-      : "";
+    // Rows are built with textContent, never innerHTML: merchant name and
+    // city come straight from the scanned QR, which anyone can craft —
+    // interpolating them as HTML would let a hostile QR inject markup or
+    // script into this page (fixed 2026-11-18 after an external review).
+    infoBox.textContent="";
+    if(rows.length){
+      var tbl=document.createElement('table'); tbl.className='info';
+      rows.forEach(function(r){
+        var tr=document.createElement('tr');
+        var k=document.createElement('td'); k.className='k'; k.textContent=r[0];
+        var v=document.createElement('td'); v.textContent=r[1];
+        tr.appendChild(k); tr.appendChild(v); tbl.appendChild(tr);
+      });
+      infoBox.appendChild(tbl);
+    }
     resultCard.scrollIntoView({behavior:"smooth", block:"start"});
   }
 
   function fail(msg){
     resultCard.classList.remove('hidden');
-    statusBox.innerHTML='<div class="status bad">❌ '+msg+'</div>';
-    infoBox.innerHTML=""; payloadBox.value="";
+    var d=document.createElement('div'); d.className='status bad'; d.textContent='❌ '+msg;
+    statusBox.textContent=""; statusBox.appendChild(d);
+    infoBox.textContent=""; payloadBox.value="";
     resultCard.scrollIntoView({behavior:"smooth", block:"start"});
   }
 

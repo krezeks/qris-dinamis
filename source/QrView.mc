@@ -33,8 +33,17 @@ class QrView extends WatchUi.View {
     function onShow() as Void {
         _qr = null;
         _failed = false;
+        var payload = QrisConvert.makePayload(_base, _amount);
+        if (payload.length() == 0) {
+            // The converter refused (malformed base or the amount could
+            // not be embedded): show the error instead of a wrong QR.
+            _failed = true;
+            _job = null;
+            WatchUi.requestUpdate();
+            return;
+        }
         _job = new QrEncoder.QrJob(
-            QrisConvert.makePayload(_base, _amount).toUtf8Array(),
+            payload.toUtf8Array(),
             QrEncoder.ECC_L, 0);
         _timer = new Timer.Timer();
         (_timer as Timer.Timer).start(method(:onTick), 50, true);

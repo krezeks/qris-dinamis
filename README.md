@@ -1,8 +1,8 @@
 # QRIS Dinamis for Garmin
 
-A Connect IQ watch app that turns a static QRIS code into a **dynamic** one — right on your wrist.
+A Connect IQ watch app that rewrites a static QRIS payload on the watch into the **dynamic format** — with the amount embedded — right on your wrist.
 
-Paste your static QRIS text once (in this app's settings in Garmin Connect), then set any amount on the watch and show a QR code with that amount already filled in. The payer just scans and pays, no typing.
+Paste your static QRIS text once (in this app's settings in Garmin Connect), then set any amount on the watch and show a QR code with that amount already filled in. The payer just scans, no typing.
 
 **On the Connect IQ Store:** [QRIS Dinamis Watch](https://apps.garmin.com/apps/9b152157-4ccb-4d9d-be47-b92038c8329b) (free)
 
@@ -22,7 +22,7 @@ Paste your static QRIS text once (in this app's settings in Garmin Connect), the
 - Amount steps of 100 / 500 / 1,000 / 10,000 / 100,000 / 1,000,000 (hold UP to change step, default 500)
 - START shows the dynamic QR with amount; hold START for the original static QR
 - Merchant name from the active profile is shown above the amount editor
-- Pasted payloads are validated on the watch (EMVCo structure + CRC16) — incomplete or corrupted pastes are rejected automatically
+- Pasted payloads are strictly validated on the watch (full TLV structure, mandatory QRIS fields, no duplicates, CRC16) — incomplete or corrupted pastes are rejected automatically. Static payloads up to 259 characters are supported (the on-watch QR encoder's ceiling)
 - **Fully offline**: no permissions, no network, no data collection. Your QRIS text never leaves your watch and phone settings
 
 ## Setup
@@ -56,6 +56,7 @@ The app generates QR codes on-device with a chunked encoder (`QrEncoder.mc`) tha
 ## Notes
 
 - This app only *displays* a receiving code. It does not process payments and is not affiliated with Bank Indonesia, ASPI, or any e-wallet or bank.
+- The dynamic-format payload is built locally on the watch from your static code (point-of-initiation set to `12`, amount tag `54` inserted, CRC16 recomputed, output verified before display). Acceptance of the resulting code is up to the payer's bank/e-wallet app — if a scan is ever refused, your original static code works as before.
 - This repository is the store variant: it ships with **no QRIS payload** — every user supplies their own.
 
 ## Support
