@@ -22,7 +22,7 @@ Paste your static QRIS text once (in this app's settings in Garmin Connect), the
 - Amount steps of 100 / 500 / 1,000 / 10,000 / 100,000 / 1,000,000 (hold UP to change step, default 500)
 - START shows the dynamic QR with amount; hold START for the original static QR
 - Merchant name from the active profile is shown above the amount editor
-- Pasted payloads are strictly validated on the watch (full TLV structure, mandatory QRIS fields, no duplicates, CRC16) — incomplete or corrupted pastes are rejected automatically. Static payloads up to 259 characters are supported (the on-watch QR encoder's ceiling)
+- Pasted payloads are strictly validated on the watch: full TLV structure walked end to end, mandatory QRIS fields (merchant account, MCC, currency IDR, country ID, name, city), no duplicate tags, nested template TLV (tags 26–51, 62, 64, 80–99) parsed with the same rules, and CRC16 checked last — incomplete or corrupted pastes are rejected automatically. Profiles must be static (no embedded amount). Static payloads up to 259 characters are supported (the on-watch QR encoder's ceiling, with room reserved for the amount tag)
 - **Fully offline**: no permissions, no network, no data collection. Your QRIS text never leaves your watch and phone settings
 
 ## Setup
